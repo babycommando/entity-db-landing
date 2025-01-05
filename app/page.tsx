@@ -1,101 +1,268 @@
+"use client";
+import { Button } from "@/components/ui/button";
+import { CanvasRevealEffect } from "@/components/ui/canvas-reveal-effect";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { CardSpotlight } from "@/components/ui/card-spotlight";
+import DotPattern from "@/components/ui/dot-pattern";
+import { FlickeringGrid } from "@/components/ui/flickering-grid";
+import { GooeyText } from "@/components/ui/gooey-text-morphing";
+import { RainbowButton } from "@/components/ui/rainbow-button";
+import { SparklesCore } from "@/components/ui/sparkles";
+import { GitHubLogoIcon } from "@radix-ui/react-icons";
+import { Book, BookOpen, Code, Github, Terminal } from "lucide-react";
 import Image from "next/image";
+import { useCallback, useState } from "react";
+//@ts-ignore
+import { EntityDB } from "@babycommando/entity-db";
+import { Input } from "@/components/ui/input";
+import PackageInstallComponent from "@/components/packages";
+
+interface Vector {
+  id: number;
+  text: string;
+  embedding: number[];
+  similarity?: number; // Add the similarity property, which is calculated during query
+  distance?: number;
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [searchValue, setSearchValue] = useState("Canine");
+  const [status, setStatus] = useState<any>(null);
+  const [queryStatus, setQueryStatus] = useState<any>(null);
+  const [queryResult, setQueryResult] = useState<Vector[] | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // Initialize the VectorDB
+  const db = new EntityDB({
+    vectorPath: "embedding",
+  });
+
+  const insertVectors = async () => {
+    try {
+      const key1 = await db.insert({
+        text: "cars", // This will auto-generate embedding
+      });
+      const key2 = await db.insert({
+        text: "dogs",
+      });
+      const key3 = await db.insert({
+        text: "cats",
+      });
+
+      setStatus(`✅ Inserted vectors with keys: ${key1}, ${key2}, ${key3}`);
+    } catch (error) {
+      setStatus(`Error inserting vectors: ${error}`);
+    }
+  };
+
+  const queryVectors = async () => {
+    try {
+      if (!searchValue.trim()) {
+        setStatus("Please enter text to query.");
+        return;
+      }
+
+      // Convert the query text into embeddings
+      const result: Vector[] = await db.query(searchValue, { limit: 20 });
+
+      setQueryResult(result);
+      setQueryStatus("Query complete.");
+    } catch (error) {
+      setQueryStatus(`Error querying vectors: ${error}`);
+    }
+  };
+
+  return (
+    <div className="h-screen">
+      <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden rounded-lg border bg-background md:shadow-xl">
+        {/* <p className="z-10 whitespace-pre-wrap text-center text-5xl font-medium tracking-tighter text-black dark:text-white">
+          Dot Pattern
+        </p> */}
+        <p className="mb-12 text-sm ">⭐ Star EntityDB on Github!</p>
+        <img
+          src="/assets/entity.png"
+          className="w-[90%] md:w-[30%] z-10 mb-8 md:mb-24"
+        />
+        <GooeyText
+          className="hidden md:block z-10 w md:w-[700px] font-bold"
+          morphTime={1}
+          cooldownTime={1.5}
+          texts={["EntityDB", "A Vector DB in Your Browser"]}
+        />
+        <h1 className="block md:hidden text-6xl font-bold">EntityDB</h1>
+        <h2 className="block md:hidden mt-2 text-xl">
+          A Vector DB in You Browser
+        </h2>
+        <br />
+        <div className="z-10 md:mt-24 w-[90%] md:w-[40%]">
+          <PackageInstallComponent />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <br />
+        <div className="  z-10 h-30">
+          <div className=" flex gap-2 md:gap-4">
+            <a
+              href="https://github.com/babycommando/entity-db"
+              target="_blank"
+              rel="noopener noreferrer">
+              <RainbowButton className="h-full gap-2 text-sm font-bold">
+                <GitHubLogoIcon className="" />
+                Github
+              </RainbowButton>
+            </a>
+
+            <a
+              href="https://github.com/babycommando/entity-db?tab=readme-ov-file#usage"
+              target="_blank"
+              rel="noopener noreferrer">
+              <Button
+                onClick={() => console.log("hy")}
+                className=" rounded-xl text-sm font-bold ">
+                <Code strokeWidth={2.5} />
+                Explore The Docs
+              </Button>
+            </a>
+          </div>
+        </div>
+
+        <DotPattern
+          className={
+            "[mask-image:radial-gradient(600px_circle_at_center,white,transparent)]"
+          }
+        />
+      </div>
+      <div className="relative flex min-h-screen p-4 w-full flex-col items-center justify-center overflow-hidden rounded-lg border bg-background md:shadow-xl">
+        {/* <CardSpotlight className="h-96 w-96">
+          <p className="text-xl font-bold relative z-20 mt-2 text-white">
+            Authentication steps
+          </p>
+          <div className="text-neutral-200 mt-4 relative z-20">
+            Follow these steps to secure your account:
+          </div>
+          <p className="text-neutral-300 mt-4 relative z-20 text-sm">
+            Ensuring your account is properly secured helps protect your
+            personal information and data.
+          </p>
+        </CardSpotlight> */}
+        {/* <FlickeringGrid
+          className="z-0 inset-0 size-full"
+          squareSize={4}
+          gridGap={6}
+          color="#1361bb"
+          maxOpacity={0.5}
+          flickerChance={0.1}
+        /> */}
+        <div className="z-10">
+          <p>See EntityDB In Action</p>
+          <br />
+          <Card className="mb-4">
+            <CardHeader>
+              <CardDescription>Create DB</CardDescription>
+              <CardTitle className="text-2xl">
+                Open Developer Tools (Press F12)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm">
+                Under the <b>Application</b> tab open <b>IndexedDB</b> and check
+                for a table named <b>Vectors</b>.
+              </p>
+              <p className="text-sm">It was created just by opening the site</p>
+            </CardContent>
+          </Card>
+
+          <Card className="mb-4">
+            <CardHeader>
+              <CardDescription>Add Data</CardDescription>
+              <CardTitle className="text-2xl">
+                Now Let's Add New Embeddings To It
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm">
+              <p>
+                Let's embed and store the words <b>Dog</b>, <b>Cat</b> and{" "}
+                <b>Car</b>.
+              </p>
+              <div>
+                <Button
+                  disabled={status}
+                  className="h-8 mt-4"
+                  onClick={() => insertVectors()}>
+                  Add Data
+                </Button>
+              </div>
+              <div>
+                {status && <p className="text-green-400 mt-4">{status}</p>}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardDescription>Query Vectors</CardDescription>
+              <CardTitle className="text-2xl">
+                Query Vectors By Similarity Search
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div>
+                <p className="text-sm mb-2">
+                  Let's apply the cosine similarity search over the stored
+                  vectors by embedding an input query.
+                </p>
+
+                <p>Search</p>
+                <div className="flex gap-2">
+                  <Input
+                    className="h-8"
+                    type="text"
+                    placeholder="Search Value"
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                  />
+                  <Button
+                    className="text-sm h-8"
+                    onClick={() => queryVectors()}>
+                    Search
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+
+            {queryResult && (
+              <CardFooter>
+                <div className="mb-2">
+                  {queryStatus && (
+                    <p className="text-green-400">Query Completed!</p>
+                  )}
+                  <h3>Results:</h3>
+                  <ul>
+                    {queryResult.map((item, index) => (
+                      <li key={index}>
+                        <strong>ID:</strong> {item.id} | <strong>Text:</strong>{" "}
+                        {item.text} | <strong>Similarity:</strong>{" "}
+                        {item.similarity?.toFixed(4)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </CardFooter>
+            )}
+          </Card>
+        </div>
+        <SparklesCore
+          background="transparent"
+          minSize={0.4}
+          maxSize={1}
+          particleDensity={200}
+          className="absolute top-0 left-0 w-full h-full"
+          particleColor="#FFFFFF"
+        />
+      </div>
     </div>
   );
 }
