@@ -1,6 +1,5 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { CanvasRevealEffect } from "@/components/ui/canvas-reveal-effect";
 import {
   Card,
   CardContent,
@@ -9,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CardSpotlight } from "@/components/ui/card-spotlight";
 import DotPattern from "@/components/ui/dot-pattern";
 import { FlickeringGrid } from "@/components/ui/flickering-grid";
 import { GooeyText } from "@/components/ui/gooey-text-morphing";
